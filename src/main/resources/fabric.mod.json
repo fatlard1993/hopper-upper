@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "hopper-upper-justfatlard",
+	"version": "${version}",
+	"name": "Hopper Upper",
+	"description": "Enables hoppers to be placed pointing up",
+	"authors": ["justfatlard"],
+	"contact": {
+		"sources": "https://github.com/fatlard1993/hopper-upper"
+	},
+	"license": "MIT",
+	"icon": "assets/hopper-upper-justfatlard/icon.png",
+	"environment": "server",
+	"entrypoints": {
+		"main": ["justfatlard.hopper_upper.Main"]
+	},
+	"mixins": ["hopper-upper-justfatlard.mixins.json"],
+	"depends": {
+		"fabricloader": ">=0.18.0",
+		"fabric-api": "*",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"polymer-core": ">=0.15.0",
+		"polymer-blocks": ">=0.15.0",
+		"polymer-resource-pack": ">=0.15.0"
+	}
+}
