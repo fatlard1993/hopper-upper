@@ -49,7 +49,6 @@ public class UpwardHopperBlockEntity extends LootableContainerBlockEntity {
 
 	private DefaultedList<ItemStack> inventory = DefaultedList.ofSize(INVENTORY_SIZE, ItemStack.EMPTY);
 	private int transferCooldown = -1;
-	private long lastTickTime;
 
 	public UpwardHopperBlockEntity(BlockPos pos, BlockState state) {
 		super(Main.UPWARD_HOPPER_BLOCK_ENTITY, pos, state);
@@ -120,7 +119,6 @@ public class UpwardHopperBlockEntity extends LootableContainerBlockEntity {
 
 	public static void serverTick(World world, BlockPos pos, BlockState state, UpwardHopperBlockEntity blockEntity) {
 		--blockEntity.transferCooldown;
-		blockEntity.lastTickTime = world.getTime();
 
 		if (!blockEntity.needsCooldown()) {
 			blockEntity.setTransferCooldown(0);
@@ -227,7 +225,7 @@ public class UpwardHopperBlockEntity extends LootableContainerBlockEntity {
 		ItemStack stack = inventory.getStack(slot);
 		if (!stack.isEmpty() && canExtract(hopper, inventory, stack, slot, direction)) {
 			ItemStack copyStack = stack.copy();
-			ItemStack remaining = transfer(inventory, hopper, inventory.removeStack(slot, 1), null);
+			ItemStack remaining = transfer(inventory, hopper, inventory.removeStack(slot, 1), Direction.DOWN);
 
 			if (remaining.isEmpty()) {
 				inventory.markDirty();
@@ -258,6 +256,9 @@ public class UpwardHopperBlockEntity extends LootableContainerBlockEntity {
 	}
 
 	public static void onEntityCollided(World world, BlockPos pos, BlockState state, Entity entity, UpwardHopperBlockEntity hopper) {
+		if (!state.get(UpwardHopperBlock.ENABLED)) {
+			return;
+		}
 		if (entity instanceof ItemEntity itemEntity && !itemEntity.getStack().isEmpty()) {
 			// Only collect items from below
 			if (itemEntity.getY() < pos.getY()) {
@@ -369,11 +370,12 @@ public class UpwardHopperBlockEntity extends LootableContainerBlockEntity {
 	}
 
 	private static boolean isInventoryFull(Inventory inventory, Direction direction) {
+		int maxPerSlot = inventory.getMaxCountPerStack();
 		if (inventory instanceof SidedInventory sidedInventory) {
 			int[] slots = sidedInventory.getAvailableSlots(direction);
 			for (int slot : slots) {
 				ItemStack stack = inventory.getStack(slot);
-				if (stack.isEmpty() || stack.getCount() < stack.getMaxCount()) {
+				if (stack.isEmpty() || stack.getCount() < Math.min(stack.getMaxCount(), maxPerSlot)) {
 					return false;
 				}
 			}
@@ -383,7 +385,7 @@ public class UpwardHopperBlockEntity extends LootableContainerBlockEntity {
 		int size = inventory.size();
 		for (int i = 0; i < size; i++) {
 			ItemStack stack = inventory.getStack(i);
-			if (stack.isEmpty() || stack.getCount() < stack.getMaxCount()) {
+			if (stack.isEmpty() || stack.getCount() < Math.min(stack.getMaxCount(), maxPerSlot)) {
 				return false;
 			}
 		}

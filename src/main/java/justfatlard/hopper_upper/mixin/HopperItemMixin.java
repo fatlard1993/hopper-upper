@@ -7,10 +7,13 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -58,15 +61,18 @@ public class HopperItemMixin {
 
 		// Place the upward hopper
 		if (world.setBlockState(pos, state, 11)) {
-			// Decrement item stack in survival
 			if (context.getPlayer() != null && !context.getPlayer().getAbilities().creativeMode) {
 				context.getStack().decrement(1);
 			}
 
-			// Play placement sound
 			if (world instanceof ServerWorld serverWorld) {
 				state.getBlock().onPlaced(serverWorld, pos, state, context.getPlayer(), context.getStack());
 			}
+
+			BlockSoundGroup soundGroup = state.getSoundGroup();
+			world.playSound(null, pos, soundGroup.getPlaceSound(), SoundCategory.BLOCKS,
+				(soundGroup.getVolume() + 1.0F) / 2.0F, soundGroup.getPitch() * 0.8F);
+			world.emitGameEvent(context.getPlayer(), GameEvent.BLOCK_PLACE, pos);
 
 			cir.setReturnValue(ActionResult.SUCCESS);
 		} else {

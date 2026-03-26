@@ -17,7 +17,7 @@
 	"mixins": ["hopper-upper-justfatlard.mixins.json"],
 	"depends": {
 		"fabricloader": ">=0.18.0",
-		"fabric-api": "*",
+		"fabric-api": ">=0.140.0",
 		"minecraft": "~1.21.11",
 		"java": ">=21",
 		"polymer-core": ">=0.15.0",

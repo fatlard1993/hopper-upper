@@ -29,6 +29,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+import net.minecraft.world.block.WireOrientation;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
@@ -120,8 +121,8 @@ public class UpwardHopperBlock extends BlockWithEntity implements Waterloggable,
 		return ActionResult.SUCCESS;
 	}
 
-	// Called by onBlockAdded and can be triggered by redstone
-	private void checkRedstoneUpdate(World world, BlockPos pos, BlockState state) {
+	@Override
+	protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
 		this.updateEnabled(world, pos, state);
 	}
 
@@ -148,7 +149,10 @@ public class UpwardHopperBlock extends BlockWithEntity implements Waterloggable,
 		return true;
 	}
 
-	// Comparator output is handled by the base class when hasComparatorOutput returns true
+	@Override
+	protected int getComparatorOutput(BlockState state, World world, BlockPos pos, Direction direction) {
+		return ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
+	}
 
 	@Override
 	public FluidState getFluidState(BlockState state) {
