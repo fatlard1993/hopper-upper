@@ -1,174 +1,164 @@
 package justfatlard.hopper_upper;
 
 import com.mojang.serialization.MapCodec;
-import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCollisionHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.Stats;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.block.WireOrientation;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
 
-public class UpwardHopperBlock extends BlockWithEntity implements Waterloggable, PolymerTexturedBlock {
-	public static final MapCodec<UpwardHopperBlock> CODEC = createCodec(UpwardHopperBlock::new);
-	public static final BooleanProperty ENABLED = Properties.ENABLED;
-	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+public class UpwardHopperBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
+	public static final MapCodec<UpwardHopperBlock> CODEC = simpleCodec(UpwardHopperBlock::new);
+	public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
+	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-	// Inverted hopper shape - mathematically inverted from vanilla (y → 16-y)
+	// Inverted hopper shape - mathematically inverted from vanilla (y -> 16-y)
 	// Bowl walls: y 0-5, rim: y 5-6, funnel: y 6-12, spout: y 12-16
-	private static final VoxelShape BOWL_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 6.0, 16.0);
-	private static final VoxelShape FUNNEL_SHAPE = Block.createCuboidShape(4.0, 6.0, 4.0, 12.0, 12.0, 12.0);
-	private static final VoxelShape SPOUT_SHAPE = Block.createCuboidShape(6.0, 12.0, 6.0, 10.0, 16.0, 10.0);
-	private static final VoxelShape OUTLINE_SHAPE = VoxelShapes.union(BOWL_SHAPE, FUNNEL_SHAPE, SPOUT_SHAPE);
+	private static final VoxelShape BOWL_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 6.0, 16.0);
+	private static final VoxelShape FUNNEL_SHAPE = Block.box(4.0, 6.0, 4.0, 12.0, 12.0, 12.0);
+	private static final VoxelShape SPOUT_SHAPE = Block.box(6.0, 12.0, 6.0, 10.0, 16.0, 10.0);
+	private static final VoxelShape OUTLINE_SHAPE = Shapes.or(BOWL_SHAPE, FUNNEL_SHAPE, SPOUT_SHAPE);
 
 	// Raycast shape for interactions
-	private static final VoxelShape RAYCAST_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+	private static final VoxelShape RAYCAST_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 
-	// Polymer block state for rendering
-	private BlockState polymerBlockState;
-
-	public UpwardHopperBlock(Settings settings) {
+	public UpwardHopperBlock(Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-			.with(ENABLED, true)
-			.with(WATERLOGGED, false));
+		this.registerDefaultState(this.getStateDefinition().any()
+			.setValue(ENABLED, true)
+			.setValue(WATERLOGGED, false));
 	}
 
 	@Override
-	protected MapCodec<? extends BlockWithEntity> getCodec() {
+	protected MapCodec<? extends BaseEntityBlock> codec() {
 		return CODEC;
 	}
 
-	public void setPolymerBlockState(BlockState state) {
-		this.polymerBlockState = state;
-	}
-
 	@Override
-	public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
-		return polymerBlockState != null ? polymerBlockState : state;
-	}
-
-	@Override
-	protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		return OUTLINE_SHAPE;
 	}
 
 	@Override
-	protected VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos) {
+	protected VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
 		return RAYCAST_SHAPE;
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext context) {
-		boolean waterlogged = context.getWorld().getFluidState(context.getBlockPos()).getFluid() == Fluids.WATER;
-		return this.getDefaultState()
-			.with(ENABLED, true)
-			.with(WATERLOGGED, waterlogged);
+	public BlockState getStateForPlacement(BlockPlaceContext context) {
+		boolean waterlogged = context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER;
+		return this.defaultBlockState()
+			.setValue(ENABLED, true)
+			.setValue(WATERLOGGED, waterlogged);
 	}
 
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new UpwardHopperBlockEntity(pos, state);
 	}
 
 	@Override
 	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-		return world.isClient() ? null : validateTicker(type, Main.UPWARD_HOPPER_BLOCK_ENTITY, UpwardHopperBlockEntity::serverTick);
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
+		return world.isClientSide() ? null : createTickerHelper(type, Main.UPWARD_HOPPER_BLOCK_ENTITY, UpwardHopperBlockEntity::serverTick);
 	}
 
 	@Override
-	protected void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		if (!oldState.isOf(state.getBlock())) {
+	protected void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+		if (!oldState.is(state.getBlock())) {
 			this.updateEnabled(world, pos, state);
 		}
 	}
 
 	@Override
-	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-		if (!world.isClient()) {
+	protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+		if (!world.isClientSide()) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			if (blockEntity instanceof UpwardHopperBlockEntity hopperEntity) {
-				player.openHandledScreen(hopperEntity);
-				player.incrementStat(Stats.INSPECT_HOPPER);
+				player.openMenu(hopperEntity);
+				player.awardStat(Stats.INSPECT_HOPPER);
 			}
 		}
-		return ActionResult.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
+	protected void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, @Nullable Orientation orientation, boolean notify) {
 		this.updateEnabled(world, pos, state);
 	}
 
-	private void updateEnabled(World world, BlockPos pos, BlockState state) {
-		boolean powered = world.isReceivingRedstonePower(pos);
-		if (powered != !state.get(ENABLED)) {
-			world.setBlockState(pos, state.with(ENABLED, !powered), Block.NOTIFY_LISTENERS);
+	private void updateEnabled(Level world, BlockPos pos, BlockState state) {
+		boolean powered = world.hasNeighborSignal(pos);
+		if (powered != !state.getValue(ENABLED)) {
+			world.setBlock(pos, state.setValue(ENABLED, !powered), Block.UPDATE_CLIENTS);
 		}
 	}
 
 	@Override
-	protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-		ItemScatterer.onStateReplaced(state, world, pos);
-		super.onStateReplaced(state, world, pos, moved);
+	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
+		Containers.updateNeighboursAfterDestroy(state, world, pos);
 	}
 
 	@Override
-	protected BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	protected RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	protected boolean hasComparatorOutput(BlockState state) {
+	protected boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
 
 	@Override
-	protected int getComparatorOutput(BlockState state, World world, BlockPos pos, Direction direction) {
-		return ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
+	protected int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos, Direction direction) {
+		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(pos));
 	}
 
 	@Override
 	public FluidState getFluidState(BlockState state) {
-		return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+		return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
 	}
 
 	@Override
-	protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-		if (state.get(WATERLOGGED)) {
-			tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+		if (state.getValue(WATERLOGGED)) {
+			tickView.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
 		}
-		return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+		return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
 	}
 
 	@Override
-	protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean collidedWithFluid) {
+	protected void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier effectApplier, boolean movedByPiston) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UpwardHopperBlockEntity hopperEntity) {
 			UpwardHopperBlockEntity.onEntityCollided(world, pos, state, entity, hopperEntity);
@@ -176,7 +166,7 @@ public class UpwardHopperBlock extends BlockWithEntity implements Waterloggable,
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(ENABLED, WATERLOGGED);
 	}
 }

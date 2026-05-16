@@ -1,19 +1,19 @@
 package justfatlard.hopper_upper.mixin;
 
 import justfatlard.hopper_upper.Main;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.Items;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,8 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockItem.class)
 public class HopperItemMixin {
-	@Inject(method = "useOnBlock", at = @At("HEAD"), cancellable = true)
-	private void onUseOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir) {
+	@Inject(method = "useOn", at = @At("HEAD"), cancellable = true)
+	private void onUseOn(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
 		BlockItem self = (BlockItem) (Object) this;
 
 		// Only intercept vanilla hopper placement
@@ -31,52 +31,52 @@ public class HopperItemMixin {
 		}
 
 		// Check if targeting the bottom face of a block (placing upward)
-		Direction side = context.getSide();
+		Direction side = context.getClickedFace();
 		if (side != Direction.DOWN) {
 			return;
 		}
 
-		World world = context.getWorld();
-		if (world.isClient()) {
-			cir.setReturnValue(ActionResult.SUCCESS);
+		Level world = context.getLevel();
+		if (world.isClientSide()) {
+			cir.setReturnValue(InteractionResult.SUCCESS);
 			return;
 		}
 
 		// Create placement context and get the position
-		ItemPlacementContext placementContext = new ItemPlacementContext(context);
-		BlockPos pos = placementContext.getBlockPos();
+		BlockPlaceContext placementContext = new BlockPlaceContext(context);
+		BlockPos pos = placementContext.getClickedPos();
 
 		// Check if we can place here
 		if (!placementContext.canPlace()) {
-			cir.setReturnValue(ActionResult.FAIL);
+			cir.setReturnValue(InteractionResult.FAIL);
 			return;
 		}
 
 		// Get upward hopper placement state
-		BlockState state = Main.UPWARD_HOPPER_BLOCK.getPlacementState(placementContext);
+		BlockState state = Main.UPWARD_HOPPER_BLOCK.getStateForPlacement(placementContext);
 		if (state == null) {
-			cir.setReturnValue(ActionResult.FAIL);
+			cir.setReturnValue(InteractionResult.FAIL);
 			return;
 		}
 
 		// Place the upward hopper
-		if (world.setBlockState(pos, state, 11)) {
-			if (context.getPlayer() != null && !context.getPlayer().getAbilities().creativeMode) {
-				context.getStack().decrement(1);
+		if (world.setBlock(pos, state, 11)) {
+			if (context.getPlayer() != null && !context.getPlayer().getAbilities().instabuild) {
+				context.getItemInHand().shrink(1);
 			}
 
-			if (world instanceof ServerWorld serverWorld) {
-				state.getBlock().onPlaced(serverWorld, pos, state, context.getPlayer(), context.getStack());
+			if (world instanceof ServerLevel serverWorld) {
+				state.getBlock().setPlacedBy(serverWorld, pos, state, context.getPlayer(), context.getItemInHand());
 			}
 
-			BlockSoundGroup soundGroup = state.getSoundGroup();
-			world.playSound(null, pos, soundGroup.getPlaceSound(), SoundCategory.BLOCKS,
+			SoundType soundGroup = state.getSoundType();
+			world.playSound(null, pos, soundGroup.getPlaceSound(), SoundSource.BLOCKS,
 				(soundGroup.getVolume() + 1.0F) / 2.0F, soundGroup.getPitch() * 0.8F);
-			world.emitGameEvent(context.getPlayer(), GameEvent.BLOCK_PLACE, pos);
+			world.gameEvent(context.getPlayer(), GameEvent.BLOCK_PLACE, pos);
 
-			cir.setReturnValue(ActionResult.SUCCESS);
+			cir.setReturnValue(InteractionResult.SUCCESS);
 		} else {
-			cir.setReturnValue(ActionResult.FAIL);
+			cir.setReturnValue(InteractionResult.FAIL);
 		}
 	}
 }

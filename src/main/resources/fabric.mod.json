@@ -16,12 +16,9 @@
 	},
 	"mixins": ["hopper-upper-justfatlard.mixins.json"],
 	"depends": {
-		"fabricloader": ">=0.18.0",
-		"fabric-api": ">=0.140.0",
-		"minecraft": "~1.21.11",
-		"java": ">=21",
-		"polymer-core": ">=0.15.0",
-		"polymer-blocks": ">=0.15.0",
-		"polymer-resource-pack": ">=0.15.0"
+		"fabricloader": ">=0.18.4",
+		"fabric-api": "*",
+		"minecraft": ">=26.1",
+		"java": ">=25"
 	}
 }
