@@ -1,12 +1,12 @@
 # Hopper Upper
 
-A Fabric mod that seamlessly enables hoppers to be placed pointing up in Minecraft 1.21.11.
+A Fabric mod that lets hoppers be placed pointing up.
 
 ![Upward Hopper in action](img.png)
 
 ## How It Works
 
-Simply place a hopper while targeting the **bottom face** of a block (looking up) - it will automatically become an upward hopper. No separate item or recipe needed.
+Place a hopper while targeting the **bottom face** of a block (looking up) and it becomes an upward hopper. No separate item or recipe needed.
 
 - Place hopper targeting bottom face → Upward Hopper
 - Place hopper targeting any other face → Normal Hopper
@@ -14,11 +14,10 @@ Simply place a hopper while targeting the **bottom face** of a block (looking up
 
 ## Features
 
-- **Seamless integration** - uses vanilla hopper item, no crafting needed
-- **Server-side only** via Polymer - vanilla clients can connect
+- **No new item** - uses the vanilla hopper item, no crafting needed
 - Full hopper functionality:
   - 5-slot inventory with hopper GUI
-  - Redstone control (disable with signal)
+  - Redstone control (disable with a signal)
   - Item entity collection from below
   - Comparator output support
   - Waterlogging
@@ -33,17 +32,19 @@ Useful for item elevators and vertical item transport.
 
 ## Requirements
 
-- Minecraft 1.21.11
-- Fabric Loader 0.18.0+
-- Fabric API
-- [Polymer](https://modrinth.com/mod/polymer) (core, blocks, resource-pack)
+- Targets the Minecraft, Fabric Loader, and Fabric API versions declared in this mod's `gradle.properties`. Check there for the exact currently-supported version
+- Java version as declared in `fabric.mod.json`'s `depends` block
+- Pandorical (see below)
+
+## Pandorical
+
+This mod is server-side only (`"environment": "server"` in `fabric.mod.json`) and registers the Upward Hopper's block and item models/textures through Pandorical's content sync so the custom block renders correctly for connecting clients.
+
+**The Pandorical mod must be installed client-side** for players to see the Upward Hopper's textures and model. Without it, the block still functions but a connecting client cannot see it rendered correctly.
 
 ## Installation
 
-1. Install Fabric Loader and Fabric API
-2. Install Polymer (core, blocks, resource-pack modules)
-3. Drop hopper-upper jar into your mods folder
-4. Start your server - vanilla clients can connect without the mod
+Install alongside its declared dependencies (see `fabric.mod.json`), including Pandorical on connecting clients.
 
 ## License
 

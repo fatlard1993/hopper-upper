@@ -42,24 +42,20 @@ public class HopperItemMixin {
 			return;
 		}
 
-		// Create placement context and get the position
 		BlockPlaceContext placementContext = new BlockPlaceContext(context);
 		BlockPos pos = placementContext.getClickedPos();
 
-		// Check if we can place here
 		if (!placementContext.canPlace()) {
 			cir.setReturnValue(InteractionResult.FAIL);
 			return;
 		}
 
-		// Get upward hopper placement state
 		BlockState state = Main.UPWARD_HOPPER_BLOCK.getStateForPlacement(placementContext);
 		if (state == null) {
 			cir.setReturnValue(InteractionResult.FAIL);
 			return;
 		}
 
-		// Place the upward hopper
 		if (world.setBlock(pos, state, 11)) {
 			if (context.getPlayer() != null && !context.getPlayer().getAbilities().instabuild) {
 				context.getItemInHand().shrink(1);
