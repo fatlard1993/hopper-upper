@@ -30,12 +30,6 @@ The Upward Hopper reverses normal hopper behavior:
 
 Useful for item elevators and vertical item transport.
 
-## Requirements
-
-- Targets the Minecraft, Fabric Loader, and Fabric API versions declared in this mod's `gradle.properties`. Check there for the exact currently-supported version
-- Java version as declared in `fabric.mod.json`'s `depends` block
-- Pandorical (see below)
-
 ## Pandorical
 
 All of Hopper Upper's own logic is server-side; there is no client entrypoint and no client mixin. It is still declared `"environment": "*"` because a singleplayer or LAN host runs its server inside the client process, and a `"server"` mod would not load there at all.
@@ -46,8 +40,8 @@ It registers the Upward Hopper's block and item, and their models and textures, 
 
 ## Installation
 
-Install server-side alongside its declared dependencies (see `fabric.mod.json`). Connecting clients need only Pandorical.
+Install server-side alongside its declared dependencies (see `fabric.mod.json`); connecting clients need only Pandorical. Version targets live in `gradle.properties` (Minecraft, loader, Fabric API) and `fabric.mod.json` (Java).
 
 ## License
 
-MIT
+MIT, see [LICENSE](LICENSE).
