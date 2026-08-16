@@ -38,13 +38,15 @@ Useful for item elevators and vertical item transport.
 
 ## Pandorical
 
-This mod is server-side only (`"environment": "server"` in `fabric.mod.json`) and registers the Upward Hopper's block and item models/textures through Pandorical's content sync so the custom block renders correctly for connecting clients.
+All of Hopper Upper's own logic is server-side; there is no client entrypoint and no client mixin. It is still declared `"environment": "*"` because a singleplayer or LAN host runs its server inside the client process, and a `"server"` mod would not load there at all.
 
-**The Pandorical mod must be installed client-side** for players to see the Upward Hopper's textures and model. Without it, the block still functions but a connecting client cannot see it rendered correctly.
+It registers the Upward Hopper's block and item, and their models and textures, through Pandorical's content sync, so connecting clients render it without a hopper-upper jar of their own.
+
+**The Pandorical mod must be installed client-side.** The Upward Hopper is a real registered block, so a client without Pandorical cannot render it and cannot receive chunks containing one.
 
 ## Installation
 
-Install alongside its declared dependencies (see `fabric.mod.json`), including Pandorical on connecting clients.
+Install server-side alongside its declared dependencies (see `fabric.mod.json`). Connecting clients need only Pandorical.
 
 ## License
 
