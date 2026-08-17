@@ -12,6 +12,14 @@ Place a hopper while targeting the **bottom face** of a block (looking up) and i
 - Place hopper targeting any other face → Normal Hopper
 - Breaking an upward hopper drops a regular hopper
 
+## Learning It
+
+Hoppers go down. Everyone knows hoppers go down, which is exactly why nobody tries pointing one up, and why this mod can sit installed for a year unnoticed.
+
+With [village-quests](https://github.com/justfatlard/village-quests) installed, a farmer who has carried grain up a ladder every harvest of their life asks you to build them something that lifts instead.
+
+Optional and guarded: without village-quests the mod behaves exactly as before.
+
 ## Features
 
 - **No new item** - uses the vanilla hopper item, no crafting needed

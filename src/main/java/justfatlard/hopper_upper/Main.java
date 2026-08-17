@@ -43,6 +43,11 @@ public class Main implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		// Guarded class load: HopperQuestRegistration names village-quests types.
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("village-quests-justfatlard")) {
+			justfatlard.hopper_upper.integration.HopperQuestRegistration.register();
+		}
+
 		// Register with Pandorical if available
 		if (PandoricalApi.isAvailable()) {
 			PandoricalApi.content().registerBlock(MOD_ID + ":upward_hopper", new BlockRegistration()
