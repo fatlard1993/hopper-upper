@@ -51,6 +51,7 @@ public class Main implements ModInitializer {
 		// Register with Pandorical if available
 		if (PandoricalApi.isAvailable()) {
 			PandoricalApi.content().registerBlock(MOD_ID + ":upward_hopper", new BlockRegistration()
+				.baseBlock("minecraft:hopper")
 				.interactive()
 				.model(MOD_ID + ":block/upward_hopper"));
 			PandoricalApi.content().registerItem(MOD_ID + ":upward_hopper", new ItemRegistration()
