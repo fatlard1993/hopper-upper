@@ -60,6 +60,20 @@ public class UpwardHopperBlockEntity extends BaseContainerBlockEntity {
 		return this.inventory.size();
 	}
 
+	/**
+	 * Vanilla's sixty-four, even where a stack-size mod has lifted the limit everywhere else.
+	 *
+	 * <p>Hoppers are machinery, not storage: comparator signal strength, item-sorter timing and
+	 * transfer rates are all read off a full stack being sixty-four. Stackz holds vanilla's own
+	 * hoppers, dispensers, furnaces and brewing stands to that for exactly this reason, and does
+	 * it by naming those classes - which this one is not, so without saying so here an upward
+	 * hopper would be the one hopper in the game that held millions.
+	 */
+	@Override
+	public int getMaxStackSize() {
+		return 64;
+	}
+
 	@Override
 	protected NonNullList<ItemStack> getItems() {
 		return this.inventory;
