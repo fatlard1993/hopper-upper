@@ -16,7 +16,7 @@ Place a hopper while targeting the **bottom face** of a block (looking up) and i
 
 Hoppers go down. Everyone knows hoppers go down, which is exactly why nobody tries pointing one up, and why this mod can sit installed for a year unnoticed.
 
-With [village-quests](https://github.com/justfatlard/village-quests) installed, a farmer who has carried grain up a ladder every harvest of their life asks you to build them something that lifts instead.
+With [village-quests](https://github.com/fatlard1993/village-quests) installed, a farmer who has carried grain up a ladder every harvest of their life asks you to build them something that lifts instead.
 
 Optional and guarded: without village-quests the mod behaves exactly as before.
 
