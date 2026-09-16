@@ -29,6 +29,7 @@ Optional and guarded: without village-quests the mod behaves exactly as before.
   - Item entity collection from below
   - Comparator output support
   - Waterlogging
+- Stacks held in it are capped at vanilla's 64, even where a stack-size mod has lifted the limit elsewhere
 
 ## Behavior
 
@@ -42,11 +43,11 @@ Useful for item elevators and vertical item transport.
 
 It registers the Upward Hopper's block and item, and their models and textures, through Pandorical's content sync, so connecting clients render it without a hopper-upper jar of their own.
 
-**The Pandorical mod must be installed client-side.** The Upward Hopper is a real registered block, so a client without Pandorical cannot render it and cannot receive chunks containing one.
+**The Pandorical mod must be installed on the server and client-side.** The Upward Hopper is a real registered block, so a client without Pandorical cannot render it and cannot receive chunks containing one.
 
 ## Development
 
-Installing and the Fabric API mixin it shares are in [DEVELOPMENT.md](DEVELOPMENT.md).
+Installing and how the Upward Hopper is built are in [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## License
 
