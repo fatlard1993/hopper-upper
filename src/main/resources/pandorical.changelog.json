@@ -1,0 +1,18 @@
+{
+	"overview": [
+		"Hoppers can be placed pointing up. Aim at the bottom face of a block and the hopper you place lifts items instead of dropping them.",
+		"No new item and no recipe: it is the hopper you already have, aimed the way nobody tries."
+	],
+	"versions": {
+		"2.0.1": [
+			"Breaking an upward hopper gives its hopper back through the game's own loot table, and the readme now rides inside the jar."
+		],
+		"2.0.0": [
+			"An upward hopper holds a vanilla stack like every other hopper and answers a right-click the way one should.",
+			"With village-quests installed, a farmer who has carried grain up a ladder all their life asks you to build something that lifts."
+		],
+		"1.0.0": [
+			"Place a hopper against the bottom face of a block and it points up. Break it and you get an ordinary hopper back."
+		]
+	}
+}
