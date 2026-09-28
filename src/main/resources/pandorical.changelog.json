@@ -5,7 +5,7 @@
 	],
 	"versions": {
 		"2.0.1": [
-			"Breaking an upward hopper gives its hopper back through the game's own loot table.",
+			"Breaking an upward hopper returns a hopper.",
 			"The readme now rides inside the jar."
 		],
 		"2.0.0": [
