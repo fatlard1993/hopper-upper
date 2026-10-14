@@ -4,6 +4,9 @@
 		"No new item and no recipe: it is the hopper you already have, aimed the way nobody tries."
 	],
 	"versions": {
+		"2.0.2": [
+			"Release notes rewritten to read plainly; nothing in play changes."
+		],
 		"2.0.1": [
 			"Breaking an upward hopper returns a hopper.",
 			"The readme now rides inside the jar."
