@@ -18,8 +18,6 @@ Hoppers go down. Everyone knows hoppers go down, which is exactly why nobody tri
 
 With [village-quests](https://github.com/fatlard1993/village-quests) installed, a farmer who has carried grain up a ladder every harvest of their life asks you to build them something that lifts instead.
 
-Optional and guarded: without village-quests the mod behaves exactly as before.
-
 ## Features
 
 - **No new item** - uses the vanilla hopper item, no crafting needed
