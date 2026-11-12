@@ -1,0 +1,36 @@
+{
+  "demo": {
+    "name": "Hopper Upper",
+    "icon": "hopper-upper-justfatlard:upward_hopper",
+    "about": [
+      "Hoppers can point up: place an ordinary hopper against the bottom face of a block and it pulls from below and pushes upward.",
+      "Build an item lift: a chest up high, hoppers placed one under the other looking up at it, and a chest at the foot. Drop cobblestone in the bottom chest and watch it climb."
+    ]
+  },
+  "pvp_preset": 1,
+  "needs": ["hopper-upper-justfatlard"],
+  "preset": {
+    "name": "Hopper Upper",
+    "icon": "hopper-upper-justfatlard:upward_hopper",
+    "pvp": false,
+    "game_mode": "survival",
+    "entry_kit": [
+      {"slot": 0, "item": {"id": "minecraft:hopper", "count": 12}},
+      {"slot": 1, "item": {"id": "minecraft:chest", "count": 4}},
+      {"slot": 2, "item": {"id": "minecraft:oak_planks", "count": 64}},
+      {"slot": 3, "item": {"id": "minecraft:ladder", "count": 16}},
+      {"slot": 4, "item": {"id": "minecraft:cobblestone", "count": 64}},
+      {"slot": 5, "item": {"id": "minecraft:iron_pickaxe", "count": 1}},
+      {"slot": 6, "item": {"id": "minecraft:torch", "count": 16}}
+    ],
+    "respawn_kit": "entry",
+    "goal": "time",
+    "mobs": "off",
+    "life": 15,
+    "size": 2,
+    "world": "overworld",
+    "shape": "flat",
+    "biome": "minecraft:plains",
+    "weather": "clear"
+  }
+}
