@@ -4,6 +4,9 @@
 		"No new item and no recipe: it is the hopper you already have, aimed the way nobody tries."
 	],
 	"versions": {
+		"2.0.5": [
+			"A demo to play in PvP Dimensions' onboarding."
+		],
 		"2.0.4": [
 			"Drop changelog notes for changes nothing in the game shows."
 		],
