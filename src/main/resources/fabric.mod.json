@@ -3,7 +3,7 @@
 	"id": "hopper-upper-justfatlard",
 	"version": "${version}",
 	"name": "Hopper Upper",
-	"description": "Enables hoppers to be placed pointing up",
+	"description": "Hoppers that can point up",
 	"authors": [
 		"justfatlard"
 	],
